@@ -40,7 +40,12 @@ function DataFetcher() {
           await axios.get(`/api?index=${index}`);
             setResults(currentResults => [...currentResults, `Request ${index} completed`]);
         } catch (error) {
-            console.error('Error:', error);
+            if (error.response && error.response.status === 429) {
+                requestQueue.current.unshift(index);
+                setTimeout(() => sendRequest(index), 1000);
+            } else {
+                console.error('Error:', error);
+            }
         } finally {
             activeRequests.current--;
         }
